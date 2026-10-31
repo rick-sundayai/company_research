@@ -1,0 +1,35 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #1a1a1a;
+  background: #fafafa;
+}
+main {
+  max-width: 72rem;
+  margin: 4rem auto;
+  padding: 0 1rem;
+}
+.empty {
+  border: 1px dashed #999;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+}
+.error {
+  color: #b00020;
+}
+label,
+input,
+button {
+  display: block;
+  font: inherit;
+}
+input {
+  margin: 0.25rem 0 1rem;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.sign-out {
+  float: right;
+}

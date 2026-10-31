@@ -6,10 +6,38 @@ It is a research aid, not an advisor. It never executes trades, and it never kno
 
 ## Status
 
-Design stage. The domain model and key decisions are written down; code comes next.
+Early build. The project skeleton and sign-in exist; the overnight job and Briefs come next, one slice at a time ([v1 spec](https://github.com/rick-sundayai/company_research/issues/1)).
 
 - [`CONTEXT.md`](CONTEXT.md): the glossary covering Company, Brief, Trigger, Stance, Source Check and the rest, along with the rules each one must keep
 - [`docs/adr/`](docs/adr/): architecture decisions and why they were made
+
+## Running it locally
+
+Needs Node 22, Docker and the Supabase CLI.
+
+```bash
+npm install
+npm run db:start      # local Supabase on ports 56321–56329
+npm run env:local     # writes .env.local from the running stack
+npm run dev           # http://localhost:3200
+```
+
+Tests: `npm test` (database rules, against the local Supabase) and `npm run test:e2e` (Playwright). CI runs both on every push.
+
+### Signing in
+
+Sign-in is by emailed link, and only for the single email in `ALLOWED_RESEARCHER_EMAIL`. Locally that is the fictional address in `.env.example`; read the link in the local mail catcher at http://localhost:56324. The first sign-in creates the Researcher. There is no sign-up.
+
+The email is enforced twice:
+
+- the sign-in action refuses any other email before contacting Supabase Auth
+- a database trigger on `auth.users` refuses to create any user whose email is not in `private.allowed_researcher_emails`, so calling Supabase Auth directly with another email cannot create a Researcher
+
+`supabase/seed.sql` allows the local email. On the hosted database (where the seed is not applied), insert the real email, lowercase, in the SQL editor, and set the same value as `ALLOWED_RESEARCHER_EMAIL` in Vercel:
+
+```sql
+insert into private.allowed_researcher_emails (email) values ('you@example.com');
+```
 
 ## How it is put together (planned)
 

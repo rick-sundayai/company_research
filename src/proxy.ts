@@ -1,0 +1,27 @@
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+import { supabaseSettings } from "./lib/supabase/settings";
+
+// Keeps the Researcher's session fresh. Access control itself lives in the pages (see requireResearcher).
+export async function proxy(request: NextRequest) {
+  let response = NextResponse.next({ request });
+  const { url, anonKey } = supabaseSettings();
+  const supabase = createServerClient(url, anonKey, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll(cookiesToSet) {
+        for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
+        response = NextResponse.next({ request });
+        for (const { name, value, options } of cookiesToSet) {
+          response.cookies.set(name, value, options);
+        }
+      },
+    },
+  });
+  await supabase.auth.getUser();
+  return response;
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};

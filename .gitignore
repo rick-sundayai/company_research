@@ -19,3 +19,9 @@ coverage/
 
 # Vercel
 .vercel/
+
+# Next.js and test output
+next-env.d.ts
+*.tsbuildinfo
+test-results/
+playwright-report/
