@@ -33,3 +33,26 @@ input {
 .sign-out {
   float: right;
 }
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.filters a[aria-current="page"] {
+  font-weight: 600;
+  text-decoration: none;
+  color: inherit;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+.not-found {
+  color: #777;
+}

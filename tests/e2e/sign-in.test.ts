@@ -1,38 +1,14 @@
 import { expect, test } from "@playwright/test";
-import {
-  allowResearcherEmail,
-  E2E_RESEARCHER_EMAIL,
-  forgetTestEmails,
-  readLocalSupabase,
-} from "../support/local-supabase";
+import { E2E_RESEARCHER_EMAIL, forgetResearchData, forgetTestEmails, readLocalSupabase } from "../support/local-supabase";
+import { latestSignInLink, resetE2eResearcher } from "../support/sign-in";
 
 const stack = readLocalSupabase();
-
-type MailpitList = { messages: { ID: string; To: { Address: string }[] }[] };
-
-async function latestSignInLink(to: string): Promise<string> {
-  for (let attempt = 0; attempt < 30; attempt++) {
-    const list: MailpitList = await (await fetch(`${stack.mailUrl}/api/v1/messages`)).json();
-    const message = list.messages.find((m) => m.To.some((t) => t.Address === to));
-    if (message) {
-      const detail = await (await fetch(`${stack.mailUrl}/api/v1/message/${message.ID}`)).json();
-      const link = /href="([^"]*\/auth\/v1\/verify[^"]*)"/.exec(detail.HTML)?.[1];
-      if (link) return link.replaceAll("&amp;", "&");
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-  }
-  throw new Error(`No sign-in email arrived for ${to}`);
-}
 
 test.afterAll(() => forgetTestEmails(stack, [E2E_RESEARCHER_EMAIL]));
 
 test("the Researcher signs in by email link to an empty Company list, and signs out", async ({ page }) => {
-  // Start clean for the dedicated e2e Researcher only; the developer's own Researcher and mail are never touched.
-  await forgetTestEmails(stack, [E2E_RESEARCHER_EMAIL]);
-  await allowResearcherEmail(stack, E2E_RESEARCHER_EMAIL);
-  await fetch(`${stack.mailUrl}/api/v1/search?query=${encodeURIComponent(`to:${E2E_RESEARCHER_EMAIL}`)}`, {
-    method: "DELETE",
-  });
+  await forgetResearchData(stack);
+  await resetE2eResearcher(stack);
 
   // A visitor who has not signed in is sent to sign-in.
   await page.goto("/");
@@ -47,7 +23,7 @@ test("the Researcher signs in by email link to an empty Company list, and signs 
   await page.getByLabel("Email").fill(E2E_RESEARCHER_EMAIL);
   await page.getByRole("button", { name: "Email me a sign-in link" }).click();
   await expect(page.getByRole("status")).toHaveText("Check your email for a sign-in link.");
-  await page.goto(await latestSignInLink(E2E_RESEARCHER_EMAIL));
+  await page.goto(await latestSignInLink(stack, E2E_RESEARCHER_EMAIL));
 
   await expect(page).toHaveURL("/");
   await expect(page.getByRole("heading", { name: "Companies" })).toBeVisible();

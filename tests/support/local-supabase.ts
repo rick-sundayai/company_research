@@ -75,6 +75,20 @@ export async function forgetTestEmails(stack: LocalSupabase, emails: string[]) {
   });
 }
 
+/**
+ * Empties every research table, for tests only. Companies can never be deleted (a database rule),
+ * so this switches off triggers for its own session to get past that rule.
+ */
+export async function forgetResearchData(stack: LocalSupabase) {
+  await withDb(stack, async (db) => {
+    await db.query("set session_replication_role = replica");
+    await db.query("delete from public.membership_changes");
+    await db.query("delete from public.tickers");
+    await db.query("delete from public.companies");
+    await db.query("delete from public.nightly_runs");
+  });
+}
+
 /** Test emails look like `label-1a2b3c4d@example.test`; the dev and e2e Researchers do not match. */
 const TEST_EMAIL_PATTERN = "^[a-z0-9-]+-[0-9a-f]{8}@example\\.test$";
 

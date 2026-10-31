@@ -5,6 +5,8 @@ const stack = readLocalSupabase();
 
 export default defineConfig({
   testDir: "tests/e2e",
+  // The tests share one e2e Researcher and one local database; run them one at a time.
+  workers: 1,
   use: { baseURL: "http://localhost:3200" },
   webServer: {
     command: "npm run dev",
