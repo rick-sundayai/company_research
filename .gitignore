@@ -1,0 +1,21 @@
+# Local working notes, never pushed
+.scratch/
+
+# Secrets
+.env
+.env*.local
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# OS and editor
+.DS_Store
+.vscode/
+.idea/
+
+# Vercel
+.vercel/
