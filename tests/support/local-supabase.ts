@@ -76,12 +76,21 @@ export async function forgetTestEmails(stack: LocalSupabase, emails: string[]) {
 }
 
 /**
- * Empties every research table, for tests only. Companies can never be deleted (a database rule),
- * so this switches off triggers for its own session to get past that rule.
+ * Empties every research table, for tests only. Companies, Stance entries and Research List changes
+ * are never deleted (database rules), so this switches off triggers for its own session to get past them.
  */
 export async function forgetResearchData(stack: LocalSupabase) {
   await withDb(stack, async (db) => {
     await db.query("set session_replication_role = replica");
+    await db.query("delete from public.brief_requests");
+    await db.query("delete from public.filings");
+    await db.query("delete from public.ai_calls");
+    await db.query("delete from public.briefs");
+    await db.query("delete from public.triggers");
+    await db.query("delete from public.sector_medians");
+    await db.query("delete from public.company_snapshots");
+    await db.query("delete from public.research_list_changes");
+    await db.query("delete from public.stance_entries");
     await db.query("delete from public.membership_changes");
     await db.query("delete from public.tickers");
     await db.query("delete from public.companies");

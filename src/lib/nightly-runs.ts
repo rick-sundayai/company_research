@@ -8,13 +8,18 @@ export type NightlyRun = {
   membershipUpdate: "applied" | "refused" | "failed" | null;
   membershipNote: string | null;
   error: string | null;
+  briefsWritten: number;
+  briefsDeferred: number;
+  briefsHeldBack: number;
 };
 
 /** The latest overnight runs, newest first. */
 export async function recentRuns(supabase: SupabaseClient, limit = 10): Promise<NightlyRun[]> {
   const { data, error } = await supabase
     .from("nightly_runs")
-    .select("run_date, started_at, finished_at, outcome, membership_update, membership_note, error")
+    .select(
+      "run_date, started_at, finished_at, outcome, membership_update, membership_note, error, briefs_written, briefs_deferred, briefs_held_back",
+    )
     .order("started_at", { ascending: false })
     .order("id", { ascending: false })
     .limit(limit);
@@ -28,5 +33,8 @@ export async function recentRuns(supabase: SupabaseClient, limit = 10): Promise<
     membershipUpdate: run.membership_update,
     membershipNote: run.membership_note,
     error: run.error,
+    briefsWritten: run.briefs_written,
+    briefsDeferred: run.briefs_deferred,
+    briefsHeldBack: run.briefs_held_back,
   }));
 }

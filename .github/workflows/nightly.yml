@@ -1,0 +1,45 @@
+name: Nightly Check
+
+# The overnight job (ADR 0002): Index Membership, the Nightly Check, Triggers, Briefs and the Digest,
+# against the real sources and the hosted database. Scheduled off the hour, and it tolerates a late start.
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      run_date:
+        description: "Night to run, YYYY-MM-DD (leave empty for today in UTC)"
+        required: false
+
+permissions:
+  contents: read
+
+# Never two nights at once against the same database.
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  night:
+    # About 1,500 Finnhub calls at 60 a minute: ubuntu-slim would stop it after 15 minutes.
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run the night
+        run: npm run night
+        env:
+          RUN_DATE: ${{ inputs.run_date }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}

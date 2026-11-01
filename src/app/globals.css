@@ -56,3 +56,99 @@ td {
 .not-found {
   color: #777;
 }
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+}
+.facts dd {
+  margin: 0;
+}
+.current-stance {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+select,
+textarea {
+  display: block;
+  font: inherit;
+  margin: 0.25rem 0 1rem;
+  padding: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+.history {
+  list-style: none;
+  padding: 0;
+}
+.history li {
+  border-bottom: 1px solid #ddd;
+  padding: 0.5rem 0;
+}
+.history p {
+  margin: 0.25rem 0 0;
+}
+caption {
+  text-align: left;
+  font-weight: 600;
+  padding: 0.5rem 0;
+}
+th[scope="row"] {
+  font-weight: normal;
+}
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.site-header nav {
+  display: flex;
+  gap: 1rem;
+}
+.site-header .sign-out {
+  float: none;
+}
+.banner {
+  flex-basis: 100%;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #fff4d6;
+  border: 1px solid #e0b84a;
+}
+.stance-tag {
+  color: #555;
+}
+.brief {
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  padding: 0 1rem 1rem;
+  margin: 1rem 0;
+  background: #fff;
+}
+.notice {
+  font-size: 0.9rem;
+  color: #555;
+  font-style: italic;
+}
+.summary p {
+  margin: 0.25rem 0;
+}
+li.plain {
+  list-style: none;
+  margin-left: -1rem;
+}
+.demo-label {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-weight: 600;
+  background: #1f3a5f;
+  color: #fff;
+}
+.table-scroll {
+  overflow-x: auto;
+}

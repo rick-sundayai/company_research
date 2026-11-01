@@ -24,6 +24,8 @@ writeFileSync(
     `ALLOWED_RESEARCHER_EMAIL=${researcherEmail}`,
     `SUPABASE_URL=${value("API_URL")}`,
     `SUPABASE_ANON_KEY=${value("ANON_KEY")}`,
+    // For `npm run night` against the local stack; add FINNHUB_API_KEY and SEC_USER_AGENT yourself.
+    `SUPABASE_SERVICE_ROLE_KEY=${value("SERVICE_ROLE_KEY")}`,
     "",
   ].join("\n"),
 );

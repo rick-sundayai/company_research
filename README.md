@@ -6,7 +6,7 @@ It is a research aid, not an advisor. It never executes trades, and it never kno
 
 ## Status
 
-Early build. The project skeleton and sign-in exist; the overnight job and Briefs come next, one slice at a time ([v1 spec](https://github.com/rick-sundayai/company_research/issues/1)).
+The v1 slices are built ([v1 spec](https://github.com/rick-sundayai/company_research/issues/1)): sign-in, Companies and Index Membership, Stances, the Research List, the Nightly Check with Sector Medians, Triggers and the Digest, Briefs within the Research Budget, the Source Check, Filings, the Gemini writer, requested Briefs and demo mode. The hosted instance still needs its keys and its first run.
 
 - [`CONTEXT.md`](CONTEXT.md): the glossary covering Company, Brief, Trigger, Stance, Source Check and the rest, along with the rules each one must keep
 - [`docs/adr/`](docs/adr/): architecture decisions and why they were made
@@ -22,7 +22,13 @@ npm run env:local     # writes .env.local from the running stack
 npm run dev           # http://localhost:3200
 ```
 
-Tests: `npm test` (database rules, against the local Supabase) and `npm run test:e2e` (Playwright). CI runs both on every push.
+Tests, all against the local Supabase with made-up data:
+
+- `npm test`: the night runner (with fake sources), the database rules and the source adapters
+- `npm run test:e2e`: the web app in a browser (Playwright)
+- `npm run test:e2e:demo`: every page in demo mode carries the fictional-data label
+
+CI runs all three on every push. `npm run test:contract` checks that the real services (SPY holdings, Wikipedia, SEC, EDGAR, Finnhub, Gemini) still return the shapes the adapters expect. It needs the keys in `.env.local`, costs a fraction of a cent, and never runs in CI.
 
 ### Signing in
 
@@ -39,13 +45,23 @@ The email is enforced twice:
 insert into private.allowed_researcher_emails (email) values ('you@example.com');
 ```
 
-## How it is put together (planned)
+### The nightly job
+
+`npm run night` runs one night against the database in `SUPABASE_URL`: Index Membership, the Nightly Check of every current member (about 25 minutes at Finnhub's free-tier rate), Triggers, Filings and Briefs. It needs `SUPABASE_SERVICE_ROLE_KEY`, `FINNHUB_API_KEY`, `GEMINI_API_KEY` and `SEC_USER_AGENT` (a name and contact address, as the SEC asks); see `.env.example`.
+
+The `Nightly Check` workflow runs it at 03:17 UTC and can be started by hand (optionally for a given date). It reads those values, plus `SUPABASE_URL`, from the repository's Actions secrets. A monthly `Heartbeat` workflow commits a timestamp so GitHub doesn't switch the schedule off.
+
+### Demo mode
+
+`DEMO=1 npm run demo:seed` fills an empty database with twelve nights of made-up data about fictional companies, by running the real night runner over fictional sources. Start the app with `DEMO=1` and every page says it is showing fictional sample data.
+
+## How it is put together
 
 - **Nightly job:** a scheduled GitHub Actions workflow in this repo ([ADR 0002](docs/adr/0002-nightly-job-on-github-actions.md))
 - **Web app:** Next.js on Vercel, sign-in only, for one person
 - **Data:** Supabase
 - **Sources:** market data from Finnhub and company filings (10-K, 10-Q) from SEC EDGAR, with nothing filled in from general knowledge
-- **Writing:** AI-written summaries, checked against the Brief's own facts before they are shown, under a $10/month cap
+- **Writing:** summaries by Gemini 2.5 Flash-Lite (paid tier, batched), checked against the Brief's own facts before they are shown, under a $10/month cap
 
 ## Why the code is public but the app isn't
 

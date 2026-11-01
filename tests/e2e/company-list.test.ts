@@ -1,19 +1,16 @@
 import { expect, test } from "@playwright/test";
-import { runNight } from "../../src/night/run-night";
 import {
-  constituentList,
-  fakeConstituentSource,
   HARBOR_LANE,
   QUILLFEATHER,
   type FictionalCompany,
 } from "../support/fake-constituent-source";
 import {
-  adminClient,
   E2E_RESEARCHER_EMAIL,
   forgetResearchData,
   forgetTestEmails,
   readLocalSupabase,
 } from "../support/local-supabase";
+import { runTestNight } from "../support/nights";
 import { signInAsE2eResearcher } from "../support/sign-in";
 
 const stack = readLocalSupabase();
@@ -26,12 +23,7 @@ const MARSH_GLASS: FictionalCompany = {
 };
 
 function nightWith(date: string, companies: FictionalCompany[]) {
-  return runNight({
-    runDate: date,
-    clock: { now: () => new Date(`${date}T03:17:00Z`) },
-    db: adminClient(stack),
-    constituents: fakeConstituentSource(constituentList(companies)),
-  });
+  return runTestNight(stack, date, { companies });
 }
 
 test.afterAll(async () => {

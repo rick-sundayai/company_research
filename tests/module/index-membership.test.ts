@@ -3,7 +3,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { listCompanies, type CompanyRow } from "../../src/lib/companies";
 import { recentRuns } from "../../src/lib/nightly-runs";
 import type { ConstituentSource } from "../../src/night/constituent-source";
-import { runNight } from "../../src/night/run-night";
 import {
   constituentList,
   fakeConstituentSource,
@@ -14,12 +13,12 @@ import {
   type FictionalCompany,
 } from "../support/fake-constituent-source";
 import {
-  adminClient,
   createTestResearcher,
   forgetResearchData,
   forgetTestEmails,
   readLocalSupabase,
 } from "../support/local-supabase";
+import { runTestNight } from "../support/nights";
 
 const stack = readLocalSupabase();
 const createdEmails: string[] = [];
@@ -35,12 +34,7 @@ afterAll(async () => {
 });
 
 function night(date: string, source: ConstituentSource) {
-  return runNight({
-    runDate: date,
-    clock: { now: () => new Date(`${date}T03:17:00Z`) },
-    db: adminClient(stack),
-    constituents: source,
-  });
+  return runTestNight(stack, date, { constituents: source });
 }
 
 function nightWith(date: string, companies: FictionalCompany[]) {
@@ -63,8 +57,17 @@ describe("Index Membership", () => {
       otherTickers: ["ZHLA"],
       membership: "current",
       history: [{ change: "joined", seenOn: "2026-11-02" }],
+      stance: "Unreviewed",
+      onResearchList: false,
     });
     expect((await company(QUILLFEATHER.cik))?.primaryTicker).toBe("ZQLF");
+  });
+
+  it("doesn't add a Company that joins the index to the Research List", async () => {
+    await nightWith("2026-11-02", [QUILLFEATHER]);
+    await nightWith("2026-11-03", [QUILLFEATHER, HARBOR_LANE]);
+
+    expect(await listCompanies(researcher, { membership: "all", researchList: true })).toEqual([]);
   });
 
   it("records each run with its start, finish, outcome and membership result", async () => {
@@ -79,6 +82,9 @@ describe("Index Membership", () => {
         membershipUpdate: "applied",
         membershipNote: null,
         error: null,
+        briefsWritten: 0,
+        briefsDeferred: 0,
+        briefsHeldBack: 0,
       },
     ]);
   });
