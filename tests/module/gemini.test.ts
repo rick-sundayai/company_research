@@ -74,14 +74,17 @@ describe("The Gemini writer", () => {
     const results = await writer.writeBriefs([brief("Fictional One"), brief("Fictional Two")]);
 
     expect(results.map((r) => r.text)).toEqual(["First", "Second"]);
-    // Batch price: $0.05 a million tokens in, $0.20 out.
-    expect(results[0].usage).toEqual({ inputTokens: 1000, outputTokens: 200, costUsd: 0.00009 });
+    // Batch price: $0.15 a million tokens in, $1.25 out.
+    expect(results[0].usage).toEqual({ inputTokens: 1000, outputTokens: 200, costUsd: 0.0004 });
     const submit = calls[0];
     expect(submit.url).toBe(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:batchGenerateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:batchGenerateContent",
     );
     expect(submit.key).toBe("test-key-not-real");
     expect(calls.every((c) => !c.url.includes("test-key-not-real"))).toBe(true);
+    const requestBody = JSON.stringify(submit.body);
+    expect(requestBody).toContain('"thinkingLevel":"minimal"');
+    expect(requestBody).not.toContain("thinkingBudget");
     const requests = (submit.body as { batch: { input_config: { requests: { requests: { request: { contents: { parts: { text: string }[] }[] } }[] } } } })
       .batch.input_config.requests.requests;
     expect(requests).toHaveLength(2);
@@ -100,11 +103,11 @@ describe("The Gemini writer", () => {
     const [result] = await writer.summariseFilings([filing]);
 
     expect(result.text).toBe("Direct");
-    // Standard price: $0.10 a million tokens in, $0.40 out.
-    expect(result.usage.costUsd).toBe(0.00018);
+    // Standard price: $0.30 a million tokens in, $2.50 out.
+    expect(result.usage.costUsd).toBe(0.0008);
     expect(calls.some((c) => c.url.endsWith("/batches/slow:cancel"))).toBe(true);
     expect(calls.at(-1)?.url).toBe(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
     );
   });
 
@@ -138,10 +141,10 @@ describe("The Gemini writer", () => {
 
     // A Brief is budgeted for 4,096 tokens out; a Filing summary for 2,048.
     const estimate = writer.estimateBrief(brief("Fictional"));
-    expect(estimate).toBeGreaterThan(4096 * 0.4e-6);
-    expect(estimate).toBeLessThan(0.01);
+    expect(estimate).toBeGreaterThan(4096 * 2.5e-6);
+    expect(estimate).toBeLessThan(0.02);
     expect(writer.estimateFilingSummary({ ...filing, text: "x".repeat(400_000) })).toBeCloseTo(
-      (100_000 + 150) * 0.1e-6 + 2048 * 0.4e-6,
+      (100_000 + 150) * 0.3e-6 + 2048 * 2.5e-6,
       4,
     );
   });

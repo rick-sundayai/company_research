@@ -61,7 +61,7 @@ The `Nightly Check` workflow runs it at 03:17 UTC and can be started by hand (op
 - **Web app:** Next.js on Vercel, sign-in only, for one person
 - **Data:** Supabase
 - **Sources:** market data from Finnhub and company filings (10-K, 10-Q) from SEC EDGAR, with nothing filled in from general knowledge
-- **Writing:** summaries by Gemini 2.5 Flash-Lite (paid tier, batched), checked against the Brief's own facts before they are shown, under a $10/month cap
+- **Writing:** summaries by Gemini 3.5 Flash-Lite (paid tier, batched), checked against the Brief's own facts before they are shown, under a $10/month cap
 
 ## Why the code is public but the app isn't
 

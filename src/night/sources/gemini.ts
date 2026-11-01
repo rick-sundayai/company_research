@@ -1,4 +1,4 @@
-// The AI writer on Gemini 2.5 Flash-Lite, paid tier (content isn't used to improve Google's products).
+// The AI writer on Gemini 3.5 Flash-Lite, paid tier (content isn't used to improve Google's products).
 // Each night's requests go in as a batch at half price; if the batch hasn't finished within the time
 // limit, or leaves a request unanswered, those requests are made directly at full price so the Digest
 // stays on time. Every result carries its real token usage and cost.
@@ -10,12 +10,12 @@
 import type { AiResult, AiWriter, BriefRequest, FilingRequest } from "../ai-writer";
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta";
-export const GEMINI_MODEL = "gemini-2.5-flash-lite";
+export const GEMINI_MODEL = "gemini-3.5-flash-lite";
 
-// Dollars per token on the paid tier (checked 2026-10-31): standard, and batch at half that.
+// Dollars per token on the paid tier (checked 2026-11-01): standard, and batch at half that.
 const PRICE = {
-  standard: { input: 0.1e-6, output: 0.4e-6 },
-  batch: { input: 0.05e-6, output: 0.2e-6 },
+  standard: { input: 0.3e-6, output: 2.5e-6 },
+  batch: { input: 0.15e-6, output: 1.25e-6 },
 };
 const BRIEF_MAX_OUTPUT = 4096;
 const FILING_MAX_OUTPUT = 2048;
@@ -49,7 +49,7 @@ export type GeminiConfig = {
 type GenerateRequest = {
   systemInstruction: { parts: { text: string }[] };
   contents: { role: "user"; parts: { text: string }[] }[];
-  generationConfig: { maxOutputTokens: number; temperature: number; thinkingConfig: { thinkingBudget: number } };
+  generationConfig: { maxOutputTokens: number; temperature: number; thinkingConfig: { thinkingLevel: "minimal" } };
 };
 
 const roundCost = (n: number) => Math.round(n * 1e8) / 1e8;
@@ -74,7 +74,7 @@ function request(instructions: string, prompt: string, maxOutputTokens: number):
   return {
     systemInstruction: { parts: [{ text: instructions }] },
     contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: { maxOutputTokens, temperature: 0.2, thinkingConfig: { thinkingBudget: 0 } },
+    generationConfig: { maxOutputTokens, temperature: 0.2, thinkingConfig: { thinkingLevel: "minimal" } },
   };
 }
 

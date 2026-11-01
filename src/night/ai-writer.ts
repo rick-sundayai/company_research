@@ -1,4 +1,4 @@
-// The AI writer (Gemini 2.5 Flash-Lite in production; a fake in tests). It summarises Filings, and
+// The AI writer (Gemini 3.5 Flash-Lite in production; a fake in tests). It summarises Filings, and
 // writes a Brief's summary from the Brief's own facts and sources. Requests go in as
 // a list so the adapter can send them as one batch; each result carries its real token usage and cost.
 
